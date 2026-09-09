@@ -179,18 +179,6 @@ const Layout = ({
       >
         {children}
       </Box>
-
-      {/* Snackbar Toast Notifications */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={5000}
-        onClose={onCloseSnackbar}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-      >
-        <Alert onClose={onCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%', fontWeight: 600 }}>
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
     </Box>
   );
 };

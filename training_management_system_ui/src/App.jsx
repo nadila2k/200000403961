@@ -8,6 +8,7 @@ import NominationsView from './views/NominationsView';
 import OfficersDeptView from './views/OfficersDeptView';
 import TrainersVenuesView from './views/TrainersVenuesView';
 import { apiService, getMockMode, setMockMode } from './api/apiService';
+import toast, { Toaster } from 'react-hot-toast';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -25,15 +26,25 @@ function App() {
   // Submit Nomination Dialog global state
   const [openNominateDialog, setOpenNominateDialog] = useState(false);
 
-  // Toast Snackbar State
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
-
-  const showNotification = (message, severity = 'success') => {
-    setSnackbar({ open: true, message, severity });
-  };
-
-  const handleCloseSnackbar = () => {
-    setSnackbar((prev) => ({ ...prev, open: false }));
+  const showNotification = (message, type = 'success') => {
+    if (type === 'success') {
+      toast.success(message, {
+        style: { borderRadius: '8px', background: '#0f172a', color: '#fff', fontWeight: 600 },
+      });
+    } else if (type === 'error') {
+      toast.error(message, {
+        style: { borderRadius: '8px', background: '#991b1b', color: '#fff', fontWeight: 600 },
+      });
+    } else if (type === 'warning') {
+      toast(message, {
+        icon: '⚠️',
+        style: { borderRadius: '8px', background: '#9a3412', color: '#fff', fontWeight: 600 },
+      });
+    } else {
+      toast(message, {
+        style: { borderRadius: '8px', background: '#1e293b', color: '#fff', fontWeight: 600 },
+      });
+    }
   };
 
   const fetchAllData = async () => {
@@ -86,13 +97,12 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
+      <Toaster position="top-right" reverseOrder={false} />
       <Layout
         activeTab={activeTab}
         onNavigate={(tab) => setActiveTab(tab)}
         isMockMode={isMock}
         onToggleMockMode={handleToggleMockMode}
-        snackbar={snackbar}
-        onCloseSnackbar={handleCloseSnackbar}
       >
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
