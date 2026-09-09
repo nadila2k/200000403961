@@ -16,6 +16,9 @@ public class OfficerResponse {
     private Long departmentId;
     private String departmentName;
     private String designation;
+    private String grade;
+    private java.time.LocalDate serviceStartDate;
+    private Integer yearsOfService;
     private String email;
     private String phone;
 }

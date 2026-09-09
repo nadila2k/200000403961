@@ -37,4 +37,6 @@ public class TrainingProgrammeRequest {
     private Integer maxParticipants;
 
     private Set<Long> targetDepartmentIds;
+
+    private java.util.List<EligibilityRuleRequest> eligibilityRules;
 }

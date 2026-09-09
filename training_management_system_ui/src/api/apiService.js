@@ -103,6 +103,10 @@ export const apiService = {
     const res = await fetch(`${API_BASE_URL}/programmes/${id}`, { method: 'DELETE' });
     return handleResponse(res);
   },
+  checkEligibility: async (programmeId, officerId) => {
+    const res = await fetch(`${API_BASE_URL}/programmes/${programmeId}/check-eligibility?officerId=${officerId}`);
+    return handleResponse(res);
+  },
 
   // --- NOMINATIONS ---
   getNominations: async () => {

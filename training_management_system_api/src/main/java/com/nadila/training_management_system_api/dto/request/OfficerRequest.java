@@ -24,6 +24,10 @@ public class OfficerRequest {
 
     private String designation;
 
+    private String grade;
+
+    private java.time.LocalDate serviceStartDate;
+
     @Email(message = "Email must be valid")
     private String email;
 

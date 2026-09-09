@@ -140,38 +140,103 @@ public class DataSeeder implements CommandLineRunner {
          * =========================
          */
 
+        /*
+         * =========================
+         * TRAINING PROGRAMMES & ELIGIBILITY RULES
+         * =========================
+         */
+
         // 1. Cybersecurity Awareness Programme (Max 40 participants)
         Set<Department> cyberDepts = new HashSet<>(allDepts);
 
-        TrainingProgramme cyberProgramme = trainingProgrammeRepository.save(
-                TrainingProgramme.builder()
-                        .title("Cybersecurity Awareness Programme")
-                        .description(
-                                "Essential security protocols, threat detection, phishing defense, " +
-                                        "and personal data protection compliance for public officers."
-                        )
-                        .startDate(LocalDate.now().plusDays(14))
-                        .endDate(LocalDate.now().plusDays(16))
-                        .venue(mainHall)
-                        .trainer(externalTrainer)
-                        .maxParticipants(40)
-                        .targetDepartments(cyberDepts)
-                        .build()
-        );
+        TrainingProgramme cyberProgramme = TrainingProgramme.builder()
+                .title("Cybersecurity Awareness Programme")
+                .description("Essential security protocols, threat detection, phishing defense, and personal data protection compliance for public officers.")
+                .startDate(LocalDate.now().plusDays(14))
+                .endDate(LocalDate.now().plusDays(16))
+                .venue(mainHall)
+                .trainer(externalTrainer)
+                .maxParticipants(40)
+                .targetDepartments(cyberDepts)
+                .build();
 
-        // 2. Leadership Development Programme
-        TrainingProgramme leadershipProgramme = trainingProgrammeRepository.save(
-                TrainingProgramme.builder()
-                        .title("Public Sector Leadership & Strategic Management")
-                        .description("Executive training on public governance, ethics, and transformational leadership.")
-                        .startDate(LocalDate.now().plusDays(25))
-                        .endDate(LocalDate.now().plusDays(28))
-                        .venue(conferenceRoom)
-                        .trainer(internalTrainer)
-                        .maxParticipants(20)
-                        .targetDepartments(new HashSet<>(List.of(hrDepartment, administrationDepartment)))
-                        .build()
-        );
+        // 2. Financial Management Programme
+        TrainingProgramme finProgramme = TrainingProgramme.builder()
+                .title("Financial Management Programme")
+                .description("Budgeting, financial compliance, auditing, and fiscal governance in the public sector.")
+                .startDate(LocalDate.now().plusDays(20))
+                .endDate(LocalDate.now().plusDays(22))
+                .venue(conferenceRoom)
+                .trainer(internalTrainer)
+                .maxParticipants(25)
+                .targetDepartments(new HashSet<>(List.of(financeDepartment)))
+                .build();
+
+        // Eligibility Rule for Financial Management: Target Departments (Finance & Treasury, Budget, Planning)
+        EligibilityRule finRule = EligibilityRule.builder()
+                .programme(finProgramme)
+                .ruleType(com.nadila.training_management_system_api.enums.EligibilityRuleType.TARGET_DEPARTMENT)
+                .ruleValue("Finance & Treasury, Budget, Planning")
+                .customErrorMessage("Only officers belonging to Finance, Budget, or Planning divisions are eligible.")
+                .build();
+        finProgramme.setEligibilityRules(List.of(finRule));
+
+        // 3. Technical Programme
+        TrainingProgramme techProgramme = TrainingProgramme.builder()
+                .title("Technical Programme: Advanced Cloud Architecture")
+                .description("Hands-on workshop on cloud migration, DevOps, and microservices for IT divisions.")
+                .startDate(LocalDate.now().plusDays(30))
+                .endDate(LocalDate.now().plusDays(33))
+                .venue(computerLab)
+                .trainer(externalTrainer)
+                .maxParticipants(15)
+                .targetDepartments(new HashSet<>(List.of(itDepartment)))
+                .build();
+
+        EligibilityRule techRule = EligibilityRule.builder()
+                .programme(techProgramme)
+                .ruleType(com.nadila.training_management_system_api.enums.EligibilityRuleType.TARGET_DEPARTMENT)
+                .ruleValue("Information Technology, IT")
+                .customErrorMessage("Only officers belonging to IT or ICT-related divisions are eligible.")
+                .build();
+        techProgramme.setEligibilityRules(List.of(techRule));
+
+        // 4. Management Development Programme
+        TrainingProgramme mgmtProgramme = TrainingProgramme.builder()
+                .title("Management Development Programme")
+                .description("Strategic leadership, policy formulation, and organizational change management.")
+                .startDate(LocalDate.now().plusDays(40))
+                .endDate(LocalDate.now().plusDays(45))
+                .venue(conferenceRoom)
+                .trainer(internalTrainer)
+                .maxParticipants(20)
+                .targetDepartments(new HashSet<>(allDepts))
+                .build();
+
+        EligibilityRule mgmtGradeRule = EligibilityRule.builder()
+                .programme(mgmtProgramme)
+                .ruleType(com.nadila.training_management_system_api.enums.EligibilityRuleType.REQUIRED_GRADE)
+                .ruleValue("Grade I, Executive")
+                .customErrorMessage("Management Development Programme requires Grade I or Executive designation.")
+                .build();
+
+        EligibilityRule mgmtServiceRule = EligibilityRule.builder()
+                .programme(mgmtProgramme)
+                .ruleType(com.nadila.training_management_system_api.enums.EligibilityRuleType.MIN_YEARS_OF_SERVICE)
+                .ruleValue("3")
+                .customErrorMessage("Management Development Programme requires a minimum of 3 years of service.")
+                .build();
+
+        EligibilityRule repeatRule = EligibilityRule.builder()
+                .programme(mgmtProgramme)
+                .ruleType(com.nadila.training_management_system_api.enums.EligibilityRuleType.REPEAT_COOLDOWN_PERIOD)
+                .ruleValue("12")
+                .customErrorMessage("Officer has already participated in this programme within the previous 12 months.")
+                .build();
+
+        mgmtProgramme.setEligibilityRules(List.of(mgmtGradeRule, mgmtServiceRule, repeatRule));
+
+        trainingProgrammeRepository.saveAll(List.of(cyberProgramme, finProgramme, techProgramme, mgmtProgramme));
 
         /*
          * =========================
@@ -184,17 +249,24 @@ public class DataSeeder implements CommandLineRunner {
                 "Systems Analyst", "HR Officer", "Finance Executive", "Operations Assistant",
                 "Senior IT Officer", "Accountant", "Administrative Officer", "Project Manager"
         };
+        String[] grades = {"Grade I", "Grade II", "Grade III", "Executive"};
 
         for (int i = 1; i <= 60; i++) {
             Department dept = allDepts.get((i - 1) % allDepts.size());
             String desig = designations[(i - 1) % designations.length];
+            String grade = grades[(i - 1) % grades.length];
             String nic = String.format("1990%08d", i);
+
+            // Give varying service start dates (from 1 to 10 years ago)
+            LocalDate startDate = LocalDate.now().minusYears(1 + (i % 10)).minusMonths(i % 12);
 
             Officer officer = Officer.builder()
                     .fullName(String.format("Officer %02d", i))
                     .nic(nic)
                     .department(dept)
                     .designation(desig)
+                    .grade(grade)
+                    .serviceStartDate(startDate)
                     .email(String.format("officer%02d@gov.lk", i))
                     .phone(String.format("+94 77 %03d %04d", 100 + (i % 900), 1000 + i))
                     .build();

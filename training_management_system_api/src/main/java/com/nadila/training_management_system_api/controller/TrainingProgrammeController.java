@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 public class TrainingProgrammeController {
 
     private final TrainingProgrammeService programmeService;
+    private final com.nadila.training_management_system_api.service.EligibilityService eligibilityService;
 
     @PostMapping
     public ResponseEntity<ApiResponse> create(@Valid @RequestBody TrainingProgrammeRequest request) {
@@ -38,6 +39,12 @@ public class TrainingProgrammeController {
     @GetMapping
     public ResponseEntity<ApiResponse> getAll() {
         return ResponseEntity.ok(new ApiResponse(ResponseStatus.SUCCESS, "Training programmes fetched successfully", programmeService.getAll()));
+    }
+
+    @GetMapping("/{id}/check-eligibility")
+    public ResponseEntity<ApiResponse> checkEligibility(@PathVariable Long id, @RequestParam Long officerId) {
+        var result = eligibilityService.checkEligibility(id, officerId);
+        return ResponseEntity.ok(new ApiResponse(ResponseStatus.SUCCESS, "Eligibility check completed", result));
     }
 
     @DeleteMapping("/{id}")

@@ -34,11 +34,11 @@ public class NominationServiceImpl implements NominationService {
     private final TrainingProgrammeRepository programmeRepository;
     private final OfficerRepository officerRepository;
     private final DepartmentRepository departmentRepository;
+    private final com.nadila.training_management_system_api.service.EligibilityService eligibilityService;
 
     @Override
     @Transactional
     public NominationResponse nominate(NominationRequest request) {
-
 
         TrainingProgramme programme = programmeRepository.findByIdForUpdate(request.getProgrammeId())
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -51,6 +51,14 @@ public class NominationServiceImpl implements NominationService {
         Department nominatingDepartment = departmentRepository.findById(request.getNominatingDepartmentId())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Department not found with id: " + request.getNominatingDepartmentId()));
+
+        // Validate Officer Eligibility
+        var eligibilityCheck = eligibilityService.evaluateEligibility(programme, officer);
+        if (!eligibilityCheck.isEligible()) {
+            String msg = String.format("Officer '%s' is not eligible for programme '%s': %s",
+                    officer.getFullName(), programme.getTitle(), String.join("; ", eligibilityCheck.getFailureReasons()));
+            throw new com.nadila.training_management_system_api.exception.IneligibleOfficerException(msg, eligibilityCheck.getFailureReasons());
+        }
 
 
         Optional<Nomination> existing = nominationRepository

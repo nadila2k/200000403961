@@ -37,6 +37,8 @@ public class OfficerServiceImpl implements OfficerService {
                 .nic(request.getNic())
                 .department(department)
                 .designation(request.getDesignation())
+                .grade(request.getGrade())
+                .serviceStartDate(request.getServiceStartDate())
                 .email(request.getEmail())
                 .phone(request.getPhone())
                 .build();
@@ -54,6 +56,8 @@ public class OfficerServiceImpl implements OfficerService {
         officer.setNic(request.getNic());
         officer.setDepartment(department);
         officer.setDesignation(request.getDesignation());
+        officer.setGrade(request.getGrade());
+        officer.setServiceStartDate(request.getServiceStartDate());
         officer.setEmail(request.getEmail());
         officer.setPhone(request.getPhone());
 
@@ -101,6 +105,9 @@ public class OfficerServiceImpl implements OfficerService {
                 .departmentId(officer.getDepartment().getDepartmentId())
                 .departmentName(officer.getDepartment().getName())
                 .designation(officer.getDesignation())
+                .grade(officer.getGrade())
+                .serviceStartDate(officer.getServiceStartDate())
+                .yearsOfService(officer.getYearsOfService())
                 .email(officer.getEmail())
                 .phone(officer.getPhone())
                 .build();

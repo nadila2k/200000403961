@@ -36,6 +36,8 @@ const OfficersDeptView = ({ officers, departments, onRefresh, showNotification }
     nic: '',
     departmentId: '',
     designation: '',
+    grade: '',
+    serviceStartDate: '',
     email: '',
     phone: '',
   });
@@ -58,6 +60,8 @@ const OfficersDeptView = ({ officers, departments, onRefresh, showNotification }
       nic: '',
       departmentId: departments[0]?.departmentId || '',
       designation: '',
+      grade: '',
+      serviceStartDate: '',
       email: '',
       phone: '',
     });
@@ -179,7 +183,8 @@ const OfficersDeptView = ({ officers, departments, onRefresh, showNotification }
                 <TableCell>Officer Name</TableCell>
                 <TableCell>NIC</TableCell>
                 <TableCell>Department</TableCell>
-                <TableCell>Designation</TableCell>
+                <TableCell>Designation & Grade</TableCell>
+                <TableCell>Service History</TableCell>
                 <TableCell>Contact Info</TableCell>
                 <TableCell align="right">Actions</TableCell>
               </TableRow>
@@ -191,7 +196,22 @@ const OfficersDeptView = ({ officers, departments, onRefresh, showNotification }
                   <TableCell sx={{ fontWeight: 700 }}>{off.fullName}</TableCell>
                   <TableCell>{off.nic || 'N/A'}</TableCell>
                   <TableCell>{off.departmentName}</TableCell>
-                  <TableCell>{off.designation || 'N/A'}</TableCell>
+                  <TableCell>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>{off.designation || 'N/A'}</Typography>
+                    {off.grade && (
+                      <Typography variant="caption" color="primary" sx={{ display: 'block', fontWeight: 600 }}>
+                        {off.grade}
+                      </Typography>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2">{off.yearsOfService !== undefined ? `${off.yearsOfService} yrs service` : 'N/A'}</Typography>
+                    {off.serviceStartDate && (
+                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                        Joined: {off.serviceStartDate}
+                      </Typography>
+                    )}
+                  </TableCell>
                   <TableCell>
                     <Typography variant="body2">{off.email}</Typography>
                     <Typography variant="caption" color="text.secondary">
@@ -282,12 +302,31 @@ const OfficersDeptView = ({ officers, departments, onRefresh, showNotification }
                   ))}
                 </TextField>
               </Grid>
-              <Grid item xs={12}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
                   label="Designation / Position"
                   value={officerForm.designation}
                   onChange={(e) => setOfficerForm({ ...officerForm, designation: e.target.value })}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Grade (e.g. Grade I, Executive)"
+                  placeholder="Grade I, Executive"
+                  value={officerForm.grade}
+                  onChange={(e) => setOfficerForm({ ...officerForm, grade: e.target.value })}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  type="date"
+                  label="Service Start Date"
+                  InputLabelProps={{ shrink: true }}
+                  value={officerForm.serviceStartDate}
+                  onChange={(e) => setOfficerForm({ ...officerForm, serviceStartDate: e.target.value })}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>

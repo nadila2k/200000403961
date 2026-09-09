@@ -28,7 +28,16 @@ public class Officer {
 
     private String designation;
 
+    private String grade;
+
+    private java.time.LocalDate serviceStartDate;
+
     private String email;
 
     private String phone;
+
+    public int getYearsOfService() {
+        if (serviceStartDate == null) return 0;
+        return java.time.Period.between(serviceStartDate, java.time.LocalDate.now()).getYears();
+    }
 }

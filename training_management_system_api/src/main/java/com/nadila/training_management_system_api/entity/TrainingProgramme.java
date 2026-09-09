@@ -54,4 +54,8 @@ public class TrainingProgramme {
     @Builder.Default
     @OneToMany(mappedBy = "programme", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Nomination> nominations = new java.util.ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "programme", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<EligibilityRule> eligibilityRules = new java.util.ArrayList<>();
 }

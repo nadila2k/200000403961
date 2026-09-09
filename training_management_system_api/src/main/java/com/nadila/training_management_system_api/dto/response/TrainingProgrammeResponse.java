@@ -24,4 +24,5 @@ public class TrainingProgrammeResponse {
     private Integer approvedCount;
     private Integer availableSeats;
     private Set<DepartmentResponse> targetDepartments;
+    private java.util.List<EligibilityRuleResponse> eligibilityRules;
 }

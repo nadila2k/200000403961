@@ -39,6 +39,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
+    @ExceptionHandler(IneligibleOfficerException.class)
+    public ResponseEntity<ApiResponse> handleIneligibleOfficer(IneligibleOfficerException ex) {
+        ApiResponse response = new ApiResponse(ResponseStatus.ERROR, ex.getMessage(), ex.getFailureReasons());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
     /**
      * Handle validation errors from @Valid.
      */

@@ -52,6 +52,18 @@ public class TrainingProgrammeServiceImpl implements TrainingProgrammeService {
                 .targetDepartments(resolveDepartments(request.getTargetDepartmentIds()))
                 .build();
 
+        if (request.getEligibilityRules() != null && !request.getEligibilityRules().isEmpty()) {
+            List<com.nadila.training_management_system_api.entity.EligibilityRule> rules = request.getEligibilityRules().stream()
+                    .map(r -> com.nadila.training_management_system_api.entity.EligibilityRule.builder()
+                            .programme(programme)
+                            .ruleType(r.getRuleType())
+                            .ruleValue(r.getRuleValue())
+                            .customErrorMessage(r.getCustomErrorMessage())
+                            .build())
+                    .collect(Collectors.toList());
+            programme.setEligibilityRules(rules);
+        }
+
         return toResponse(programmeRepository.save(programme));
     }
 
@@ -67,6 +79,21 @@ public class TrainingProgrammeServiceImpl implements TrainingProgrammeService {
         programme.setVenue(resolveVenue(request.getVenueId()));
         programme.setTrainer(resolveTrainer(request.getTrainerId()));
         programme.setTargetDepartments(resolveDepartments(request.getTargetDepartmentIds()));
+
+        programme.getEligibilityRules().clear();
+        if (request.getEligibilityRules() != null && !request.getEligibilityRules().isEmpty()) {
+            for (var r : request.getEligibilityRules()) {
+                programme.getEligibilityRules().add(
+                        com.nadila.training_management_system_api.entity.EligibilityRule.builder()
+                                .programme(programme)
+                                .ruleType(r.getRuleType())
+                                .ruleValue(r.getRuleValue())
+                                .customErrorMessage(r.getCustomErrorMessage())
+                                .build()
+                );
+            }
+        }
+
         return toResponse(programmeRepository.save(programme));
     }
 
@@ -117,6 +144,16 @@ public class TrainingProgrammeServiceImpl implements TrainingProgrammeService {
         long approved = nominationRepository.countByProgramme_ProgrammeIdAndStatus(
                 programme.getProgrammeId(), NominationStatus.APPROVED);
 
+        List<com.nadila.training_management_system_api.dto.response.EligibilityRuleResponse> rules =
+                programme.getEligibilityRules() == null ? List.of() : programme.getEligibilityRules().stream()
+                        .map(r -> com.nadila.training_management_system_api.dto.response.EligibilityRuleResponse.builder()
+                                .ruleId(r.getRuleId())
+                                .ruleType(r.getRuleType())
+                                .ruleValue(r.getRuleValue())
+                                .customErrorMessage(r.getCustomErrorMessage())
+                                .build())
+                        .toList();
+
         return TrainingProgrammeResponse.builder()
                 .programmeId(programme.getProgrammeId())
                 .title(programme.getTitle())
@@ -131,6 +168,7 @@ public class TrainingProgrammeServiceImpl implements TrainingProgrammeService {
                 .targetDepartments(programme.getTargetDepartments().stream()
                         .map(d -> modelMapper.map(d, DepartmentResponse.class))
                         .collect(Collectors.toSet()))
+                .eligibilityRules(rules)
                 .build();
     }
 }
