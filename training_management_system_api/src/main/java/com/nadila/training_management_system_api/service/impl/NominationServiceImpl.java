@@ -39,7 +39,8 @@ public class NominationServiceImpl implements NominationService {
     @Transactional
     public NominationResponse nominate(NominationRequest request) {
 
-        TrainingProgramme programme = programmeRepository.findById(request.getProgrammeId())
+
+        TrainingProgramme programme = programmeRepository.findByIdForUpdate(request.getProgrammeId())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Training programme not found with id: " + request.getProgrammeId()));
 
@@ -51,10 +52,7 @@ public class NominationServiceImpl implements NominationService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Department not found with id: " + request.getNominatingDepartmentId()));
 
-        // ---- 1. DUPLICATE-NOMINATION CHECK ----
-        // An officer may only have one ACTIVE (PENDING/APPROVED/WAITLISTED) nomination
-        // per programme, no matter which department submits it. This is what stops
-        // Finance and Administration both nominating the same officer for the same course.
+
         Optional<Nomination> existing = nominationRepository
                 .findFirstByProgramme_ProgrammeIdAndOfficer_OfficerIdAndStatusIn(
                         programme.getProgrammeId(), officer.getOfficerId(), ACTIVE_STATUSES);
@@ -71,7 +69,7 @@ public class NominationServiceImpl implements NominationService {
             ));
         }
 
-        // ---- 2. CAPACITY CHECK -> confirm if available seats, else auto-waitlist ----
+
         long approvedCount = nominationRepository.countByProgramme_ProgrammeIdAndStatus(
                 programme.getProgrammeId(), NominationStatus.APPROVED);
 
@@ -101,10 +99,29 @@ public class NominationServiceImpl implements NominationService {
         } catch (IllegalArgumentException ex) {
             throw new IllegalArgumentException("Invalid nomination status: " + status);
         }
+
+
+        if (newStatus == NominationStatus.APPROVED && oldStatus != NominationStatus.APPROVED) {
+
+            TrainingProgramme lockedProgramme = programmeRepository
+                    .findByIdForUpdate(nomination.getProgramme().getProgrammeId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Training programme not found with id: " + nomination.getProgramme().getProgrammeId()));
+
+            long approvedCount = nominationRepository.countByProgramme_ProgrammeIdAndStatus(
+                    lockedProgramme.getProgrammeId(), NominationStatus.APPROVED);
+
+            if (approvedCount >= lockedProgramme.getMaxParticipants()) {
+                throw new IllegalStateException(String.format(
+                        "Cannot approve nomination %d: '%s' is already at full capacity (%d/%d).",
+                        nominationId, lockedProgramme.getTitle(), approvedCount, lockedProgramme.getMaxParticipants()));
+            }
+        }
+
         nomination.setStatus(newStatus);
         Nomination saved = nominationRepository.save(nomination);
 
-        // If a confirmed (APPROVED) nomination is cancelled/rejected/withdrawn, promote the first eligible waitlisted person (FIFO)
+
         if (oldStatus == NominationStatus.APPROVED && newStatus != NominationStatus.APPROVED) {
             promoteNextWaitlistedNominationIfSeatAvailable(nomination.getProgramme().getProgrammeId());
         }
@@ -167,12 +184,10 @@ public class NominationServiceImpl implements NominationService {
         }
     }
 
-    /**
-     * Helper method to promote the earliest waitlisted nomination (ordered by nominatedAt ASC)
-     * when a confirmed seat opens up due to cancellation or status change.
-     */
+
     private void promoteNextWaitlistedNominationIfSeatAvailable(Long programmeId) {
-        TrainingProgramme programme = programmeRepository.findById(programmeId).orElse(null);
+
+        TrainingProgramme programme = programmeRepository.findByIdForUpdate(programmeId).orElse(null);
         if (programme == null) return;
 
         long approvedCount = nominationRepository.countByProgramme_ProgrammeIdAndStatus(
