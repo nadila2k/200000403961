@@ -71,13 +71,13 @@ public class NominationServiceImpl implements NominationService {
             ));
         }
 
-        // ---- 2. CAPACITY CHECK -> auto-waitlist if programme is full ----
+        // ---- 2. CAPACITY CHECK -> confirm if available seats, else auto-waitlist ----
         long approvedCount = nominationRepository.countByProgramme_ProgrammeIdAndStatus(
                 programme.getProgrammeId(), NominationStatus.APPROVED);
 
-        NominationStatus initialStatus = approvedCount >= programme.getMaxParticipants()
-                ? NominationStatus.WAITLISTED
-                : NominationStatus.PENDING;
+        NominationStatus initialStatus = approvedCount < programme.getMaxParticipants()
+                ? NominationStatus.APPROVED
+                : NominationStatus.WAITLISTED;
 
         Nomination nomination = Nomination.builder()
                 .programme(programme)
@@ -94,6 +94,7 @@ public class NominationServiceImpl implements NominationService {
     @Transactional
     public NominationResponse updateStatus(Long nominationId, String status) {
         Nomination nomination = getEntity(nominationId);
+        NominationStatus oldStatus = nomination.getStatus();
         NominationStatus newStatus;
         try {
             newStatus = NominationStatus.valueOf(status.toUpperCase());
@@ -101,12 +102,25 @@ public class NominationServiceImpl implements NominationService {
             throw new IllegalArgumentException("Invalid nomination status: " + status);
         }
         nomination.setStatus(newStatus);
-        return toResponse(nominationRepository.save(nomination));
+        Nomination saved = nominationRepository.save(nomination);
+
+        // If a confirmed (APPROVED) nomination is cancelled/rejected/withdrawn, promote the first eligible waitlisted person (FIFO)
+        if (oldStatus == NominationStatus.APPROVED && newStatus != NominationStatus.APPROVED) {
+            promoteNextWaitlistedNominationIfSeatAvailable(nomination.getProgramme().getProgrammeId());
+        }
+
+        return toResponse(saved);
     }
 
     @Override
     public NominationResponse getById(Long nominationId) {
         return toResponse(getEntity(nominationId));
+    }
+
+    @Override
+    public List<NominationResponse> getAll() {
+        return nominationRepository.findAll()
+                .stream().map(this::toResponse).toList();
     }
 
     @Override
@@ -143,8 +157,38 @@ public class NominationServiceImpl implements NominationService {
     @Transactional
     public void withdraw(Long nominationId) {
         Nomination nomination = getEntity(nominationId);
+        NominationStatus oldStatus = nomination.getStatus();
         nomination.setStatus(NominationStatus.WITHDRAWN);
         nominationRepository.save(nomination);
+
+        // If a confirmed (APPROVED) participant cancels/withdraws, promote earliest waitlisted nomination (FIFO)
+        if (oldStatus == NominationStatus.APPROVED) {
+            promoteNextWaitlistedNominationIfSeatAvailable(nomination.getProgramme().getProgrammeId());
+        }
+    }
+
+    /**
+     * Helper method to promote the earliest waitlisted nomination (ordered by nominatedAt ASC)
+     * when a confirmed seat opens up due to cancellation or status change.
+     */
+    private void promoteNextWaitlistedNominationIfSeatAvailable(Long programmeId) {
+        TrainingProgramme programme = programmeRepository.findById(programmeId).orElse(null);
+        if (programme == null) return;
+
+        long approvedCount = nominationRepository.countByProgramme_ProgrammeIdAndStatus(
+                programmeId, NominationStatus.APPROVED);
+
+        if (approvedCount < programme.getMaxParticipants()) {
+            Optional<Nomination> nextWaitlisted = nominationRepository
+                    .findFirstByProgramme_ProgrammeIdAndStatusOrderByNominatedAtAsc(
+                            programmeId, NominationStatus.WAITLISTED);
+
+            if (nextWaitlisted.isPresent()) {
+                Nomination promoted = nextWaitlisted.get();
+                promoted.setStatus(NominationStatus.APPROVED);
+                nominationRepository.save(promoted);
+            }
+        }
     }
 
     private Nomination getEntity(Long nominationId) {

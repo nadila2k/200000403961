@@ -11,11 +11,7 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  FormControlLabel,
-  Switch,
   Chip,
-  Snackbar,
-  Alert,
   Avatar,
 } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
@@ -38,10 +34,6 @@ const menuItems = [
 const Layout = ({
   activeTab,
   onNavigate,
-  isMockMode,
-  onToggleMockMode,
-  snackbar,
-  onCloseSnackbar,
   children,
 }) => {
   return (
@@ -63,28 +55,13 @@ const Layout = ({
             {menuItems.find((m) => m.id === activeTab)?.label || 'Dashboard'}
           </Typography>
 
-          {/* Connection Status & Mode Switcher */}
+          {/* Connection Status */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Chip
-              label={isMockMode ? 'STANDALONE DEMO MODE' : 'CONNECTED TO SPRING BACKEND'}
-              color={isMockMode ? 'info' : 'success'}
+              label="CONNECTED TO SPRING BACKEND"
+              color="success"
               size="small"
               sx={{ fontWeight: 700, fontSize: '0.7rem' }}
-            />
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={isMockMode}
-                  onChange={(e) => onToggleMockMode(e.target.checked)}
-                  color="primary"
-                  size="small"
-                />
-              }
-              label={
-                <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary' }}>
-                  Demo Mode
-                </Typography>
-              }
             />
           </Box>
         </Toolbar>

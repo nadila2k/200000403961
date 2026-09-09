@@ -1,6 +1,7 @@
 package com.nadila.training_management_system_api.data;
 
 import com.nadila.training_management_system_api.entity.*;
+import com.nadila.training_management_system_api.enums.NominationStatus;
 import com.nadila.training_management_system_api.enums.TrainerType;
 import com.nadila.training_management_system_api.repository.*;
 import jakarta.transaction.Transactional;
@@ -9,6 +10,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -22,6 +25,7 @@ public class DataSeeder implements CommandLineRunner {
     private final VenueRepository venueRepository;
     private final TrainerRepository trainerRepository;
     private final TrainingProgrammeRepository trainingProgrammeRepository;
+    private final NominationRepository nominationRepository;
 
     @Override
     @Transactional
@@ -41,81 +45,36 @@ public class DataSeeder implements CommandLineRunner {
         Department hrDepartment = departmentRepository.save(
                 Department.builder()
                         .name("Human Resources")
-                        .focalPointEmail("hr@example.com")
-                        .focalPointPhone("+94770000001")
+                        .focalPointEmail("hr@gov.lk")
+                        .focalPointPhone("+94 11 234 5678")
                         .build()
         );
 
         Department itDepartment = departmentRepository.save(
                 Department.builder()
                         .name("Information Technology")
-                        .focalPointEmail("it@example.com")
-                        .focalPointPhone("+94770000002")
+                        .focalPointEmail("it@gov.lk")
+                        .focalPointPhone("+94 11 234 5679")
                         .build()
         );
 
         Department financeDepartment = departmentRepository.save(
                 Department.builder()
-                        .name("Finance")
-                        .focalPointEmail("finance@example.com")
-                        .focalPointPhone("+94770000003")
+                        .name("Finance & Treasury")
+                        .focalPointEmail("finance@gov.lk")
+                        .focalPointPhone("+94 11 234 5680")
                         .build()
         );
 
         Department administrationDepartment = departmentRepository.save(
                 Department.builder()
-                        .name("Administration")
-                        .focalPointEmail("admin@example.com")
-                        .focalPointPhone("+94770000004")
+                        .name("Administration & Operations")
+                        .focalPointEmail("admin@gov.lk")
+                        .focalPointPhone("+94 11 234 5681")
                         .build()
         );
 
-
-        /*
-         * =========================
-         * OFFICERS
-         * =========================
-         */
-
-        officerRepository.saveAll(List.of(
-
-                Officer.builder()
-                        .fullName("Kasun Perera")
-                        .nic("199012345678")
-                        .department(hrDepartment)
-                        .designation("HR Officer")
-                        .email("kasun@example.com")
-                        .phone("+94771111111")
-                        .build(),
-
-                Officer.builder()
-                        .fullName("Nimal Silva")
-                        .nic("198812345679")
-                        .department(itDepartment)
-                        .designation("Software Engineer")
-                        .email("nimal@example.com")
-                        .phone("+94772222222")
-                        .build(),
-
-                Officer.builder()
-                        .fullName("Amal Fernando")
-                        .nic("199212345680")
-                        .department(financeDepartment)
-                        .designation("Finance Officer")
-                        .email("amal@example.com")
-                        .phone("+94773333333")
-                        .build(),
-
-                Officer.builder()
-                        .fullName("Saman Kumara")
-                        .nic("198512345681")
-                        .department(administrationDepartment)
-                        .designation("Administrative Officer")
-                        .email("saman@example.com")
-                        .phone("+94774444444")
-                        .build()
-        ));
-
+        List<Department> allDepts = List.of(hrDepartment, itDepartment, financeDepartment, administrationDepartment);
 
         /*
          * =========================
@@ -125,28 +84,27 @@ public class DataSeeder implements CommandLineRunner {
 
         Venue mainHall = venueRepository.save(
                 Venue.builder()
-                        .name("Main Training Hall")
-                        .location("Head Office")
-                        .capacity(100)
+                        .name("Main Auditorium")
+                        .location("Building A, 3rd Floor")
+                        .capacity(150)
                         .build()
         );
 
         Venue conferenceRoom = venueRepository.save(
                 Venue.builder()
-                        .name("Conference Room A")
-                        .location("Administration Building")
+                        .name("Executive Conference Room B")
+                        .location("Building B, 1st Floor")
                         .capacity(40)
                         .build()
         );
 
         Venue computerLab = venueRepository.save(
                 Venue.builder()
-                        .name("Computer Laboratory")
-                        .location("IT Building")
-                        .capacity(30)
+                        .name("Tech Training Lab 101")
+                        .location("IT Center, Ground Floor")
+                        .capacity(50)
                         .build()
         );
-
 
         /*
          * =========================
@@ -156,26 +114,25 @@ public class DataSeeder implements CommandLineRunner {
 
         Trainer internalTrainer = trainerRepository.save(
                 Trainer.builder()
-                        .fullName("Dr. Nuwan Jayasinghe")
+                        .fullName("Dr. Roy Fernando")
                         .type(TrainerType.INTERNAL)
-                        .specialization("Leadership and Management")
-                        .organization("Internal Training Unit")
-                        .email("nuwan@example.com")
-                        .phone("+94775555555")
+                        .specialization("Public Leadership & Governance")
+                        .organization("National Institute of Administration")
+                        .email("roy.fernando@nia.gov.lk")
+                        .phone("+94 71 111 2233")
                         .build()
         );
 
         Trainer externalTrainer = trainerRepository.save(
                 Trainer.builder()
-                        .fullName("Prof. Malini Perera")
+                        .fullName("Prof. Anura Jayawardena")
                         .type(TrainerType.EXTERNAL)
-                        .specialization("Information Technology")
-                        .organization("ABC Training Institute")
-                        .email("malini@example.com")
-                        .phone("+94776666666")
+                        .specialization("Cybersecurity & Data Protection")
+                        .organization("Cyber Resilience Center")
+                        .email("anura.j@cybercenter.lk")
+                        .phone("+94 71 444 5566")
                         .build()
         );
-
 
         /*
          * =========================
@@ -183,72 +140,103 @@ public class DataSeeder implements CommandLineRunner {
          * =========================
          */
 
-        Set<Department> leadershipDepartments = new HashSet<>();
-        leadershipDepartments.add(hrDepartment);
-        leadershipDepartments.add(administrationDepartment);
+        // 1. Cybersecurity Awareness Programme (Max 40 participants)
+        Set<Department> cyberDepts = new HashSet<>(allDepts);
 
-        TrainingProgramme leadershipProgramme =
+        TrainingProgramme cyberProgramme = trainingProgrammeRepository.save(
                 TrainingProgramme.builder()
-                        .title("Leadership Development Programme")
+                        .title("Cybersecurity Awareness Programme")
                         .description(
-                                "A training programme designed to improve leadership, " +
-                                        "communication and management skills."
+                                "Essential security protocols, threat detection, phishing defense, " +
+                                        "and personal data protection compliance for public officers."
                         )
-                        .startDate(LocalDate.now().plusDays(10))
-                        .endDate(LocalDate.now().plusDays(12))
+                        .startDate(LocalDate.now().plusDays(14))
+                        .endDate(LocalDate.now().plusDays(16))
                         .venue(mainHall)
-                        .trainer(internalTrainer)
-                        .maxParticipants(50)
-                        .targetDepartments(leadershipDepartments)
-                        .build();
-
-
-        Set<Department> javaDepartments = new HashSet<>();
-        javaDepartments.add(itDepartment);
-
-        TrainingProgramme javaProgramme =
-                TrainingProgramme.builder()
-                        .title("Advanced Java and Spring Boot")
-                        .description(
-                                "An advanced technical training programme covering " +
-                                        "Java, Spring Boot and REST API development."
-                        )
-                        .startDate(LocalDate.now().plusDays(20))
-                        .endDate(LocalDate.now().plusDays(24))
-                        .venue(computerLab)
                         .trainer(externalTrainer)
-                        .maxParticipants(25)
-                        .targetDepartments(javaDepartments)
-                        .build();
+                        .maxParticipants(40)
+                        .targetDepartments(cyberDepts)
+                        .build()
+        );
 
-
-        Set<Department> financeDepartments = new HashSet<>();
-        financeDepartments.add(financeDepartment);
-
-        TrainingProgramme financeProgramme =
+        // 2. Leadership Development Programme
+        TrainingProgramme leadershipProgramme = trainingProgrammeRepository.save(
                 TrainingProgramme.builder()
-                        .title("Financial Management Training")
-                        .description(
-                                "Training focused on financial planning, budgeting " +
-                                        "and financial management practices."
-                        )
-                        .startDate(LocalDate.now().plusDays(30))
-                        .endDate(LocalDate.now().plusDays(32))
+                        .title("Public Sector Leadership & Strategic Management")
+                        .description("Executive training on public governance, ethics, and transformational leadership.")
+                        .startDate(LocalDate.now().plusDays(25))
+                        .endDate(LocalDate.now().plusDays(28))
                         .venue(conferenceRoom)
                         .trainer(internalTrainer)
-                        .maxParticipants(35)
-                        .targetDepartments(financeDepartments)
-                        .build();
+                        .maxParticipants(20)
+                        .targetDepartments(new HashSet<>(List.of(hrDepartment, administrationDepartment)))
+                        .build()
+        );
 
+        /*
+         * =========================
+         * OFFICERS (60 Officers)
+         * =========================
+         */
 
-        trainingProgrammeRepository.saveAll(List.of(
-                leadershipProgramme,
-                javaProgramme,
-                financeProgramme
-        ));
+        List<Officer> officersList = new ArrayList<>();
+        String[] designations = {
+                "Systems Analyst", "HR Officer", "Finance Executive", "Operations Assistant",
+                "Senior IT Officer", "Accountant", "Administrative Officer", "Project Manager"
+        };
 
-        System.out.println("=================================");
-        System.out.println("Sample data seeded successfully!");
-        System.out.println("=================================");
+        for (int i = 1; i <= 60; i++) {
+            Department dept = allDepts.get((i - 1) % allDepts.size());
+            String desig = designations[(i - 1) % designations.length];
+            String nic = String.format("1990%08d", i);
+
+            Officer officer = Officer.builder()
+                    .fullName(String.format("Officer %02d", i))
+                    .nic(nic)
+                    .department(dept)
+                    .designation(desig)
+                    .email(String.format("officer%02d@gov.lk", i))
+                    .phone(String.format("+94 77 %03d %04d", 100 + (i % 900), 1000 + i))
+                    .build();
+
+            officersList.add(officer);
+        }
+
+        officersList = officerRepository.saveAll(officersList);
+
+        /*
+         * =========================
+         * NOMINATIONS (60 Valid Nominations for Cybersecurity Awareness Programme)
+         * - First 40 valid nominations -> APPROVED (Confirmed)
+         * - Remaining 20 valid nominations -> WAITLISTED
+         * =========================
+         */
+
+        List<Nomination> nominationsList = new ArrayList<>();
+        LocalDateTime baseTime = LocalDateTime.now().minusDays(15);
+
+        for (int i = 0; i < 60; i++) {
+            Officer officer = officersList.get(i);
+            // First 40 -> APPROVED, 41-60 -> WAITLISTED
+            NominationStatus status = (i < 40) ? NominationStatus.APPROVED : NominationStatus.WAITLISTED;
+
+            Nomination nom = Nomination.builder()
+                    .programme(cyberProgramme)
+                    .officer(officer)
+                    .nominatingDepartment(officer.getDepartment())
+                    .status(status)
+                    .nominatedAt(baseTime.plusHours(i)) // Sequential timestamp for FIFO order
+                    .build();
+
+            nominationsList.add(nom);
+        }
+
+        nominationRepository.saveAll(nominationsList);
+
+        System.out.println("=================================================");
+        System.out.println("Data Seeding Completed Successfully!");
+        System.out.println("Seeded: Cybersecurity Awareness Programme (Max: 40)");
+        System.out.println("Seeded: 60 Officers & 60 Nominations (40 APPROVED, 20 WAITLISTED)");
+        System.out.println("=================================================");
     }
 }

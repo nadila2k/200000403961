@@ -7,12 +7,11 @@ import ProgrammesView from './views/ProgrammesView';
 import NominationsView from './views/NominationsView';
 import OfficersDeptView from './views/OfficersDeptView';
 import TrainersVenuesView from './views/TrainersVenuesView';
-import { apiService, getMockMode, setMockMode } from './api/apiService';
+import { apiService } from './api/apiService';
 import toast, { Toaster } from 'react-hot-toast';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [isMock, setIsMock] = useState(getMockMode());
   const [loading, setLoading] = useState(true);
 
   // Entities Data State
@@ -66,9 +65,7 @@ function App() {
       setProgrammes(prgRes.data || []);
       setNominations(nomRes.data || []);
     } catch (err) {
-      showNotification(`API Error: ${err.message}. Switched to Standalone Demo Mode.`, 'warning');
-      setMockMode(true);
-      setIsMock(true);
+      showNotification(`API Error: ${err.message}`, 'error');
     } finally {
       setLoading(false);
     }
@@ -76,18 +73,7 @@ function App() {
 
   useEffect(() => {
     fetchAllData();
-  }, [isMock]);
-
-  const handleToggleMockMode = (enabled) => {
-    setMockMode(enabled);
-    setIsMock(enabled);
-    showNotification(
-      enabled
-        ? 'Switched to Standalone Interactive Demo Mode.'
-        : 'Switched to Live Spring Boot API (http://localhost:8080/api).',
-      'info'
-    );
-  };
+  }, []);
 
   const handleOpenNominateGlobal = () => {
     setActiveTab('nominations');
@@ -101,8 +87,6 @@ function App() {
       <Layout
         activeTab={activeTab}
         onNavigate={(tab) => setActiveTab(tab)}
-        isMockMode={isMock}
-        onToggleMockMode={handleToggleMockMode}
       >
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>

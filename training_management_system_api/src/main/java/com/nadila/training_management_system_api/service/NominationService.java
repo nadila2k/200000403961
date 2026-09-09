@@ -19,6 +19,8 @@ public interface NominationService {
 
     NominationResponse getById(Long nominationId);
 
+    List<NominationResponse> getAll();
+
     List<NominationResponse> getByProgramme(Long programmeId);
 
     List<NominationResponse> getByOfficer(Long officerId);

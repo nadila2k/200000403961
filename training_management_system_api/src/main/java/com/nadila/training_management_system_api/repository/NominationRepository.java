@@ -28,6 +28,12 @@ public interface NominationRepository extends JpaRepository<Nomination, Long> {
     long countByProgramme_ProgrammeIdAndStatus(Long programmeId, NominationStatus status);
 
     /**
+     * Retrieve the earliest waitlisted nomination for a programme (FIFO order based on submission timestamp).
+     */
+    Optional<Nomination> findFirstByProgramme_ProgrammeIdAndStatusOrderByNominatedAtAsc(
+            Long programmeId, NominationStatus status);
+
+    /**
      * Schedule-clash helper: find other active nominations for this officer,
      * excluding the current programme, so callers can check for overlapping dates.
      */

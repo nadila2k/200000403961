@@ -41,6 +41,11 @@ public class NominationController {
         return ResponseEntity.ok(new ApiResponse(ResponseStatus.SUCCESS, "Nomination withdrawn successfully", null));
     }
 
+    @GetMapping
+    public ResponseEntity<ApiResponse> getAll() {
+        return ResponseEntity.ok(new ApiResponse(ResponseStatus.SUCCESS, "Nominations fetched successfully", nominationService.getAll()));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(new ApiResponse(ResponseStatus.SUCCESS, "Nomination fetched successfully", nominationService.getById(id)));
